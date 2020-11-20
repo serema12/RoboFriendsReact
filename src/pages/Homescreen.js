@@ -1,44 +1,47 @@
-import React,{useState,useEffect} from 'react';
+import React,{Component} from 'react';
 import Card from '../components/Card';
 import Scroll from '../components/Scroll';
 import SearchBox from '../components/SearchBox';
-import robotArrays from '../dataType/robot';
 
-const Homescreen = (props) =>{
-    const [robots,setRobots] = useState([]);
-    const [searchField,setSearchField] = useState('');
-    useEffect(()=>{
-        const takerobotData = ()=>{
-            fetch('https://jsonplaceholder.typicode.com/users')
-            .then(response=> response.json())
-            .then(users => setRobots(users));
-
+class Homescreen extends Component {
+    constructor(){
+        super()
+        this.state ={
+            robots:[],
+            searchField:'',
         }
-        takerobotData()
-    },[])
-    const onSearchChange = (event) =>{
-        
-        setSearchField(event.target.value);
-        setRobots(robotArrays.filter((robot) => {
-            return robot.name.toLowerCase().includes(searchField.toLowerCase());
-            
-        }))
     }
-    
-    return (
+    componentDidMount(){
         
-        <div className='tc' >
+        fetch('https://jsonplaceholder.typicode.com/users')
+            .then(response=> response.json())
+            .then(users => this.setState({robots:users}));
+    }
+
+    onSearchChange = (event) =>{
+        
+        this.setState({searchField:event.target.value});
+    }
+    render(){
+        const { robots, searchField } = this.state;
+        const filteredRobots = robots.filter(robot =>{
+            return robot.name.toLowerCase().includes(searchField.toLowerCase());
+        })
+        return (
             
-            <h1 className='f1'>Robo Friends</h1>
-            <SearchBox searchChange={onSearchChange}/>
-            <Scroll>
+            <div className='tc' >
                 
-                {robots &&  robots.map(robot => 
-                    <Card key={robot.id} attributes={robot} />
-                )}
-            </Scroll>
-        </div>
-    )
+                <h1 className='f1'>Robo Friends</h1>
+                <SearchBox searchChange={this.onSearchChange}/>
+                <Scroll>
+                    
+                    {filteredRobots &&  filteredRobots.map(robot => 
+                        <Card key={robot.id} attributes={robot} />
+                    )}
+                </Scroll>
+            </div>
+        )
+    }
 }
 
 export default Homescreen;
